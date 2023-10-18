@@ -65,7 +65,7 @@ struct CreateResult {
     return_value: Bytes,
 }
 
-struct PreparedCall {
+pub struct PreparedCall {
     gas: Gas,
     checkpoint: JournalCheckpoint,
     contract: Box<Contract>,

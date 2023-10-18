@@ -29,6 +29,10 @@ type MainReturnHandle<DB> = fn(
     &Gas,
 ) -> Result<ResultAndState, EVMError<<DB as Database>::Error>>;
 
+/// Call contract handle
+type CallContractHandle<DB> =
+    fn(&mut EVMData<'_, DB>, &Gas) -> Result<(), EVMError<<DB as Database>::Error>>;
+
 /// Handler acts as a proxy and allow to define different behavior for different
 /// sections of the code. This allows nice integration of different chains or
 /// to disable some mainnet behavior.
@@ -46,6 +50,8 @@ pub struct Handler<DB: Database> {
     pub calculate_gas_refund: CalculateGasRefundHandle,
     /// Main return handle this handle output of the transact.
     pub main_return: MainReturnHandle<DB>,
+    /// Handles the contract call
+    pub call: CallContractHandle<DB>,
 }
 
 impl<DB: Database> Handler<DB> {
