@@ -1,4 +1,5 @@
-
+use crate::evm_impl::CallResult;
+use crate::evm_impl::PreparedCall;
 use crate::handler::Handler;
 use crate::interpreter::{
     analysis::to_analysed, gas, return_ok, CallContext, CallInputs, CallScheme, Contract,
@@ -13,9 +14,7 @@ use crate::{db::Database, precompile, Inspector};
 use crate::{inspector_instruction, EVMData};
 use alloc::boxed::Box;
 
-
-pub fn prepare_call<DB>(data: &mut EVMData<'_,DB, gas: &Gas) -> Result<PreparedCall,  CallResult> {
-
-
-
+/// Execute EVM call.
+pub fn call<DB: Database>(data: &mut EVMData<'_, DB>, gas: &Gas) -> CallResult {
+    CallResult::default()
 }

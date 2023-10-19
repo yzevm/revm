@@ -4,7 +4,7 @@ pub mod optimism;
 
 use crate::interpreter::{Gas, InstructionResult};
 use crate::primitives::{Env, Output, ResultAndState, Spec};
-use crate::EVMData;
+use crate::{evm_impl::CallResult, EVMData};
 use revm_interpreter::primitives::db::Database;
 use revm_interpreter::primitives::{EVMError, EVMResultGeneric};
 
@@ -30,13 +30,11 @@ type MainReturnHandle<DB> = fn(
 ) -> Result<ResultAndState, EVMError<<DB as Database>::Error>>;
 
 /// Call contract handle
-type CallContractHandle<DB> =
-    fn(&mut EVMData<'_, DB>, &Gas) -> Result<(), EVMError<<DB as Database>::Error>>;
+type CallContractHandle<DB> = fn(&mut EVMData<'_, DB>, &Gas) -> CallResult;
 
 /// Handler acts as a proxy and allow to define different behavior for different
 /// sections of the code. This allows nice integration of different chains or
 /// to disable some mainnet behavior.
-#[derive(Debug)]
 pub struct Handler<DB: Database> {
     // Uses env, call result and returned gas from the call to determine the gas
     // that is returned from transaction execution..
@@ -63,6 +61,7 @@ impl<DB: Database> Handler<DB> {
             reimburse_caller: mainnet::handle_reimburse_caller::<SPEC, DB>,
             reward_beneficiary: mainnet::reward_beneficiary::<SPEC, DB>,
             main_return: mainnet::main_return::<DB>,
+            call: mainnet::call::call::<DB>,
         }
     }
 

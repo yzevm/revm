@@ -51,7 +51,7 @@ where
     }
 }
 
-struct PreparedCreate {
+pub struct PreparedCreate {
     gas: Gas,
     created_address: Address,
     checkpoint: JournalCheckpoint,
@@ -71,7 +71,7 @@ pub struct PreparedCall {
     contract: Box<Contract>,
 }
 
-struct CallResult {
+pub struct CallResult {
     result: InstructionResult,
     gas: Gas,
     return_value: Bytes,
@@ -364,13 +364,13 @@ impl<'a, GSPEC: Spec + 'static, DB: Database> EVMImpl<'a, GSPEC, DB> {
     ) -> Self {
         let journaled_state = JournaledState::new(precompiles.len(), GSPEC::SPEC_ID);
         let instruction_table = if inspector.is_some() {
-            let instruction_table = make_boxed_instruction_table::<GSPEC, Self, _>(
-                make_instruction_table::<GSPEC, Self>(),
+            let instruction_table = make_boxed_instruction_table::<Self, GSPEC, _>(
+                make_instruction_table::<Self, GSPEC>(),
                 inspector_instruction,
             );
             InstructionTables::Boxed(Arc::new(instruction_table))
         } else {
-            InstructionTables::Plain(Arc::new(make_instruction_table::<GSPEC, Self>()))
+            InstructionTables::Plain(Arc::new(make_instruction_table::<Self, GSPEC>()))
         };
         #[cfg(feature = "optimism")]
         let handler = if env.cfg.optimism {
@@ -630,7 +630,7 @@ impl<'a, GSPEC: Spec + 'static, DB: Database> EVMImpl<'a, GSPEC, DB> {
             shared_memory,
         ));
 
-        interpreter.shared_memory.new_context_memory();
+        interpreter.shared_memory.new_context();
 
         if let Some(inspector) = self.inspector.as_mut() {
             inspector.initialize_interp(&mut interpreter, &mut self.data);
@@ -643,7 +643,7 @@ impl<'a, GSPEC: Spec + 'static, DB: Database> EVMImpl<'a, GSPEC, DB> {
 
         let (return_value, gas) = (interpreter.return_value(), *interpreter.gas());
 
-        interpreter.shared_memory.free_context_memory();
+        interpreter.shared_memory.free_context();
 
         (exit_reason, return_value, gas)
     }
